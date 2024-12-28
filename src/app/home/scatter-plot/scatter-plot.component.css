@@ -1,0 +1,10 @@
+/* 散點圖樣式 */
+figure#scatter {
+  margin: 0 auto; /* 畫布在頁面水平居中 */
+  text-align: center;
+  flex: 1; /* 讓圖表占據剩餘空間 */
+}
+
+.container {
+  display: flex;
+}

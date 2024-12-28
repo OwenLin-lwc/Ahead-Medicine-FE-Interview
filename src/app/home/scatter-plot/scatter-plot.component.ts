@@ -1,32 +1,39 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { MatListModule } from '@angular/material/list';
 
 import * as d3 from 'd3';
+import { PolygonService } from '../../shared/services/polygon.service';
+import {
+  PolygonItem,
+  PolygonPosition,
+} from '../../shared/models/polygon.model';
 
 @Component({
   selector: 'app-scatter-plot',
-  imports: [FormsModule, MatToolbarModule, MatButtonModule],
+  imports: [MatListModule],
   templateUrl: './scatter-plot.component.html',
   styleUrl: './scatter-plot.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScatterPlotComponent implements OnInit {
-  private data: any[] = [];
+  private data: PolygonPosition[] = [];
   private svg: any;
 
   private margin = { top: 20, right: 30, bottom: 40, left: 50 };
   private width = 600 - this.margin.left - this.margin.right;
   private height = 480 - this.margin.top - this.margin.bottom;
 
-  private polygons: any[] = [];
-  public drawing = false;
-  private currentPolygon: any[] = [];
-  currentLabel: string = ''; // 當前標籤輸入值
-  labels: { name: string }[] = []; // 存儲標籤的列表
+  private polygons!: PolygonPosition[];
+  public allPolygons!: PolygonItem[];
+  polygonService = inject(PolygonService);
 
   ngOnInit(): void {
-    d3.csv('CD45_pos.csv').then((data) => {
+    d3.csv(this.polygonService.csvFilename).then((data) => {
       this.data = data.map((d) => ({
         x: +d['CD45-KrO'],
         y: +d['SS INT LIN'],
@@ -34,6 +41,15 @@ export class ScatterPlotComponent implements OnInit {
       this.createSvg();
       this.drawPlot();
     });
+
+    this.polygonService.drawing$.subscribe((val) => {
+      val && this.activatePolygonTool();
+    });
+    this.polygonService.currentPolygon$.subscribe((val) => {
+      this.polygons = val;
+      this.drawPolygon();
+    });
+    this.allPolygons = this.polygonService.AllPolygons();
   }
 
   private createSvg(): void {
@@ -101,45 +117,28 @@ export class ScatterPlotComponent implements OnInit {
   }
 
   activatePolygonTool(): void {
-    this.drawing = !this.drawing;
-
-    if (!this.drawing) return;
-
     this.svg.on('click', (event: MouseEvent) => {
-      if (!this.drawing) return;
-
       // 使用 d3.pointer 獲取座標值
       const [mouseX, mouseY] = d3.pointer(event, event.target); // 注意使用 this.svg.node()
 
-      // 判斷是否在軸範圍內
-      if (
-        mouseX >= 0 &&
-        mouseX <= this.width &&
-        mouseY >= 0 &&
-        mouseY <= this.height
-      ) {
-        this.currentPolygon.push({ x: mouseX, y: mouseY });
-        this.drawPolygon();
-      }
-    });
-
-    // 完成多邊形
-    this.svg.on('dblclick', () => {
-      if (this.currentPolygon.length > 2) {
-        this.polygons.push([...this.currentPolygon]);
-        this.currentPolygon = [];
-        this.drawing = false;
-        this.drawPolygons();
-      }
+      this.polygonService.updateCurrentPolygon({ x: mouseX, y: mouseY });
     });
   }
 
   private drawPolygon(): void {
+    if (!this.svg) return;
+
     this.svg.selectAll('.temp-polygon').remove();
     this.svg
       .append('polygon')
       .attr('class', 'temp-polygon')
-      .attr('points', this.currentPolygon.map((d) => `${d.x},${d.y}`).join(' '))
+      .attr(
+        'points',
+        this.polygonService
+          .getCurrentPolygons()
+          .map((d) => `${d.x},${d.y}`)
+          .join(' ')
+      )
       .style('fill', 'none')
       .style('stroke', 'blue')
       .style('stroke-width', 1.5);
@@ -147,13 +146,13 @@ export class ScatterPlotComponent implements OnInit {
 
   private drawPolygons(): void {
     this.svg.selectAll('.polygon').remove();
-    this.polygons.forEach((polygon, index) => {
+    this.polygonService.AllPolygons().forEach((polygon, index) => {
       this.svg
         .append('polygon')
         .attr('class', 'polygon')
-        .attr('points', polygon.map((d: any) => `${d.x},${d.y}`).join(' '))
+        .attr('points', polygon.data.map((d: any) => `${d.x},${d.y}`).join(' '))
         .style('fill', 'none')
-        .style('stroke', 'blue')
+        .style('stroke', polygon.color)
         .style('stroke-width', 1.5);
     });
   }

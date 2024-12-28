@@ -1,0 +1,23 @@
+<mat-toolbar>
+  <!-- 新增標籤輸入框 -->
+  <mat-form-field style="margin-top: 1rem">
+    <mat-label>Label</mat-label>
+    <input
+      matInput
+      [formControl]="inputLabel"
+      placeholder="Enter Label"
+      required
+    />
+    @if (inputLabel.invalid) {
+    <mat-error>Required</mat-error>
+    }
+  </mat-form-field>
+  @if (!isDrawing) {
+  <button type="submit" mat-flat-button (click)="start()">
+    Arbitrary Polygon
+  </button>
+  } @else {
+  <button type="submit" mat-flat-button (click)="save()">Save</button>
+  <button mat-stroked-button (click)="clear()">Clear</button>
+  }
+</mat-toolbar>

@@ -1,0 +1,10 @@
+<div class="container">
+  <mat-list>
+    @for (item of allPolygons; track item.id) {
+    <mat-list-item>{{ item.label }}</mat-list-item>
+    }
+  </mat-list>
+  <figure id="scatter" class="right">
+    <h1>Cell Distribution (CD45+)</h1>
+  </figure>
+</div>
