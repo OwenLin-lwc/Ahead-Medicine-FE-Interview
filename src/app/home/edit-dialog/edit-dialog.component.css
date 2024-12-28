@@ -8,3 +8,11 @@
   left: 16px;
   color: red;
 }
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.copy_btn {
+  color: green;
+}
