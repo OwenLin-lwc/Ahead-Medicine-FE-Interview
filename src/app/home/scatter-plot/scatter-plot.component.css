@@ -7,4 +7,28 @@ figure#scatter {
 
 .container {
   display: flex;
+  padding: 2rem;
+  .left-list {
+    width: 212px;
+  }
+}
+
+.list_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  .list_item_tool {
+    display: flex;
+    gap: 4px;
+  }
+}
+
+.divider {
+  border-bottom: 1px solid black;
+}
+
+.mat-mdc-outlined-button {
+  padding: 0 4px;
+  height: 32px;
 }

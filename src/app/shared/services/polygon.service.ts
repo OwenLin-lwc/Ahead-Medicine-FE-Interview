@@ -7,18 +7,22 @@ import { PolygonItem, PolygonPosition } from '../models/polygon.model';
 })
 export class PolygonService {
   readonly csvFilename = 'CD45_pos.csv';
-  public drawing$ = new BehaviorSubject<boolean>(false);
+
   private currentPolygon!: PolygonPosition[];
-  public currentPolygon$ = new BehaviorSubject<PolygonPosition[]>([]);
   private polygons = signal<PolygonItem[]>([]);
+
+  public drawing$ = new BehaviorSubject<boolean>(false);
+  public currentPolygon$ = new BehaviorSubject<PolygonPosition[]>([]);
+  public updatePolygons$ = new BehaviorSubject<boolean>(false);
 
   constructor() {
     this.currentPolygon = [];
     const savedPolygons = localStorage.getItem('polygon');
     this.polygons.set(savedPolygons ? JSON.parse(savedPolygons) : []);
+    this.updatePolygons$.next(true);
   }
 
-  get AllPolygons(): Signal<PolygonItem[]> {
+  get allPolygons(): Signal<PolygonItem[]> {
     return this.polygons.asReadonly();
   }
 
@@ -34,6 +38,20 @@ export class PolygonService {
     this.clearCurrentPolygon();
     this.drawing$.next(false);
     localStorage.setItem('polygon', JSON.stringify(this.polygons()));
+    this.updatePolygons$.next(true);
+  }
+
+  toggleItem(id: string): void {
+    this.polygons.set(
+      this.polygons().map((item) => {
+        if (item.id === id) {
+          item.display = !item.display;
+        }
+        return item;
+      })
+    );
+    localStorage.setItem('polygon', JSON.stringify(this.polygons()));
+    this.updatePolygons$.next(true);
   }
 
   updateCurrentPolygon(data: PolygonPosition): void {

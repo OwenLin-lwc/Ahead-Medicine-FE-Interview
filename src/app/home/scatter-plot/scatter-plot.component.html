@@ -1,9 +1,23 @@
 <div class="container">
-  <mat-list>
-    @for (item of allPolygons; track item.id) {
-    <mat-list-item>{{ item.label }}</mat-list-item>
-    }
-  </mat-list>
+  <div class="left-list">
+    <h4>Polygons</h4>
+    <mat-list role="list">
+      @for (item of allPolygons; track item.id) {
+      <mat-list-item role="listitem">
+        <div class="list_item">
+          <div>{{ item.label }}</div>
+          <div class="list_item_tool">
+            <button mat-stroked-button (click)="editItem(item.id)">Edit</button>
+            <button mat-stroked-button (click)="toggleItem(item.id)">
+              {{ item.display ? "Hide" : "Show" }}
+            </button>
+          </div>
+        </div>
+      </mat-list-item>
+      <div class="divider"></div>
+      }
+    </mat-list>
+  </div>
   <figure id="scatter" class="right">
     <h1>Cell Distribution (CD45+)</h1>
   </figure>
