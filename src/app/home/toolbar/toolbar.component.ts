@@ -26,7 +26,7 @@ import { PolygonService } from '../../shared/services/polygon.service';
 })
 export class ToolbarComponent implements OnInit {
   currentLabel: string = ''; // 當前標籤輸入值
-  polygonService = inject(PolygonService);
+  private polygonService = inject(PolygonService);
   isDrawing!: boolean;
   readonly inputLabel = new FormControl('', [Validators.required]);
 
@@ -46,7 +46,7 @@ export class ToolbarComponent implements OnInit {
       this.inputLabel.valid &&
       this.polygonService.getCurrentPolygons().length
     ) {
-      this.polygonService.savePolygon(this.inputLabel.value!);
+      this.polygonService.createPolygon(this.inputLabel.value!);
     }
   }
 

@@ -1,0 +1,10 @@
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.delete_btn {
+  position: absolute;
+  left: 16px;
+  color: red;
+}

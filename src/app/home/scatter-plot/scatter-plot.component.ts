@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  model,
   OnInit,
+  signal,
 } from '@angular/core';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +15,8 @@ import {
   PolygonItem,
   PolygonPosition,
 } from '../../shared/models/polygon.model';
+import { MatDialog } from '@angular/material/dialog';
+import { EditDialogComponent } from '../edit-dialog/edit-dialog.component';
 
 @Component({
   selector: 'app-scatter-plot',
@@ -31,7 +35,9 @@ export class ScatterPlotComponent implements OnInit {
 
   private polygonPosition!: PolygonPosition[];
 
-  polygonService = inject(PolygonService);
+  private polygonService = inject(PolygonService);
+
+  readonly dialog = inject(MatDialog);
 
   get allPolygons(): PolygonItem[] {
     return this.polygonService.allPolygons();
@@ -208,5 +214,9 @@ export class ScatterPlotComponent implements OnInit {
     this.polygonService.toggleItem(id);
   }
 
-  editItem(id: string): void {}
+  editItem(item: PolygonItem): void {
+    this.dialog.open(EditDialogComponent, {
+      data: item,
+    });
+  }
 }

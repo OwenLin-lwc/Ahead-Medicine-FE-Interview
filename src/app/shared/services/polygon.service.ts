@@ -26,7 +26,7 @@ export class PolygonService {
     return this.polygons.asReadonly();
   }
 
-  savePolygon(label: string): void {
+  createPolygon(label: string): void {
     const data: PolygonItem = {
       id: new Date().getTime().toString(),
       label,
@@ -37,6 +37,45 @@ export class PolygonService {
     this.polygons.update((old) => [...old, data]);
     this.clearCurrentPolygon();
     this.drawing$.next(false);
+    localStorage.setItem('polygon', JSON.stringify(this.polygons()));
+    this.updatePolygons$.next(true);
+  }
+
+  updatePolygon(
+    id: string,
+    value: Partial<{
+      label: string | null;
+      color: string | null;
+    }>
+  ): void {
+    this.polygons.set(
+      this.polygons().map((item) => {
+        if (item.id === id) {
+          item.label = value.label!;
+          item.color = value.color!;
+        }
+        return item;
+      })
+    );
+    localStorage.setItem('polygon', JSON.stringify(this.polygons()));
+    this.updatePolygons$.next(true);
+  }
+
+  copyPolygon(item: PolygonItem): void {
+    const data: PolygonItem = {
+      id: new Date().getTime().toString(),
+      label: item.label + '-copy',
+      data: item.data,
+      color: item.color,
+      display: item.display,
+    };
+    this.polygons.update((old) => [...old, data]);
+    localStorage.setItem('polygon', JSON.stringify(this.polygons()));
+    this.updatePolygons$.next(true);
+  }
+
+  deletePolygon(id: string): void {
+    this.polygons.set(this.polygons().filter((item) => item.id !== id));
     localStorage.setItem('polygon', JSON.stringify(this.polygons()));
     this.updatePolygons$.next(true);
   }
@@ -62,6 +101,7 @@ export class PolygonService {
   clearCurrentPolygon(): void {
     this.currentPolygon = [];
     this.currentPolygon$.next([]);
+    this.drawing$.next(false);
   }
 
   getCurrentPolygons(): PolygonPosition[] {
